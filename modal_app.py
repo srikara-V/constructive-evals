@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import argparse
+import os
 import shlex
 import subprocess
 
@@ -63,25 +63,13 @@ def run_cli(command: str, *, use_power_persona: bool = True) -> int:
 
 @app.local_entrypoint()
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Run constructive-evals CLI on Modal.")
-    parser.add_argument(
-        "--command",
-        default=None,
-        help=(
-            "Command to run. By default this is appended to "
-            "'python -m power_persona_sampling ...'. "
-            "If omitted, uses the DEFAULT_COMMAND constant."
-        ),
-    )
-    parser.add_argument(
-        "--raw",
-        action="store_true",
-        help="Run the command as-is instead of routing through power_persona_sampling.",
-    )
-    args = parser.parse_args()
+    command = DEFAULT_COMMAND
+    use_power_persona = True
+    if "MODAL_COMMAND" in os.environ:
+        command = os.environ["MODAL_COMMAND"]
+    if os.environ.get("MODAL_RAW") == "1":
+        use_power_persona = False
 
-    command = args.command or DEFAULT_COMMAND
-
-    rc = run_cli.remote(command, use_power_persona=not args.raw)
+    rc = run_cli.remote(command, use_power_persona=use_power_persona)
     if rc != 0:
         raise SystemExit(rc)
