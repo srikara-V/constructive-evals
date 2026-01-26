@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import argparse
-import os
 import shlex
 import subprocess
 
@@ -10,6 +9,16 @@ import modal
 
 APP_NAME = "constructive-evals"
 REPO_PATH = "/root"
+DEFAULT_COMMAND = (
+    "eval-gsm8k "
+    "--model Qwen/Qwen2.5-0.5B-Instruct "
+    "--split test "
+    "--limit 25 "
+    "--out /tmp/gsm8k_mh.jsonl "
+    "--mh-steps 10 "
+    "--alpha 3.0 "
+    "--prompt-style short"
+)
 
 image = (
     modal.Image.debian_slim()
@@ -61,7 +70,7 @@ def main() -> None:
         help=(
             "Command to run. By default this is appended to "
             "'python -m power_persona_sampling ...'. "
-            "If omitted, uses the MODAL_COMMAND environment variable."
+            "If omitted, uses the DEFAULT_COMMAND constant."
         ),
     )
     parser.add_argument(
@@ -71,9 +80,7 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    command = args.command or os.environ.get("MODAL_COMMAND")
-    if not command:
-        raise SystemExit("Missing command. Pass --command or set MODAL_COMMAND.")
+    command = args.command or DEFAULT_COMMAND
 
     rc = run_cli.remote(command, use_power_persona=not args.raw)
     if rc != 0:
