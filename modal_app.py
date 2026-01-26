@@ -22,9 +22,18 @@ DEFAULT_COMMAND = (
     "--prompt-style short"
 )
 
-image = (
-    modal.Image.debian_slim()
-    .pip_install(
+def _image_with_repo(base: modal.Image) -> modal.Image:
+    add_dir = getattr(base, "add_local_dir", None)
+    if callable(add_dir):
+        return base.add_local_dir(REPO_ROOT, remote_path=REPO_PATH)
+    copy_dir = getattr(base, "copy_local_dir", None)
+    if callable(copy_dir):
+        return base.copy_local_dir(REPO_ROOT, remote_path=REPO_PATH)
+    raise RuntimeError("Modal Image API does not support add/copy local dir.")
+
+
+image = _image_with_repo(
+    modal.Image.debian_slim().pip_install(
         "torch",
         "transformers",
         "datasets",
@@ -35,26 +44,6 @@ image = (
 )
 
 app = modal.App(APP_NAME, include_source=True)
-
-
-def _repo_mount():
-    mount_cls = getattr(modal, "Mount", None)
-    if mount_cls is not None:
-        if hasattr(mount_cls, "from_local_dir"):
-            return mount_cls.from_local_dir(REPO_ROOT, remote_path=REPO_PATH)
-        if hasattr(mount_cls, "local_dir"):
-            return mount_cls.local_dir(REPO_ROOT, remote_path=REPO_PATH)
-    mount_module = getattr(modal, "mount", None)
-    if mount_module is not None:
-        if hasattr(mount_module, "from_local_dir"):
-            return mount_module.from_local_dir(REPO_ROOT, remote_path=REPO_PATH)
-        if hasattr(mount_module, "Mount"):
-            mount_cls = mount_module.Mount
-            if hasattr(mount_cls, "from_local_dir"):
-                return mount_cls.from_local_dir(REPO_ROOT, remote_path=REPO_PATH)
-            if hasattr(mount_cls, "local_dir"):
-                return mount_cls.local_dir(REPO_ROOT, remote_path=REPO_PATH)
-    raise RuntimeError("Modal Mount API not available; cannot mount repo source.")
 
 
 def _split_command(cmd: str) -> list[str]:
@@ -72,7 +61,6 @@ def _power_persona_command(args: str) -> list[str]:
     image=image,
     gpu="A10G",
     timeout=60 * 60,
-    mounts=[_repo_mount()],
     secrets=[modal.Secret.from_name("huggingface")],
 )
 def run_cli(command: str, *, use_power_persona: bool = True) -> int:
