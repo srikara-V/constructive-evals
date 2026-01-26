@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import os
 import shlex
 import subprocess
 
@@ -56,10 +57,11 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Run constructive-evals CLI on Modal.")
     parser.add_argument(
         "--command",
-        required=True,
+        default=None,
         help=(
             "Command to run. By default this is appended to "
-            "'python -m power_persona_sampling ...'."
+            "'python -m power_persona_sampling ...'. "
+            "If omitted, uses the MODAL_COMMAND environment variable."
         ),
     )
     parser.add_argument(
@@ -69,6 +71,10 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    rc = run_cli.remote(args.command, use_power_persona=not args.raw)
+    command = args.command or os.environ.get("MODAL_COMMAND")
+    if not command:
+        raise SystemExit("Missing command. Pass --command or set MODAL_COMMAND.")
+
+    rc = run_cli.remote(command, use_power_persona=not args.raw)
     if rc != 0:
         raise SystemExit(rc)
