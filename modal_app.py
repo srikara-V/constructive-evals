@@ -40,10 +40,20 @@ app = modal.App(APP_NAME, include_source=True)
 def _repo_mount():
     mount_cls = getattr(modal, "Mount", None)
     if mount_cls is not None:
-        return mount_cls.from_local_dir(REPO_ROOT, remote_path=REPO_PATH)
+        if hasattr(mount_cls, "from_local_dir"):
+            return mount_cls.from_local_dir(REPO_ROOT, remote_path=REPO_PATH)
+        if hasattr(mount_cls, "local_dir"):
+            return mount_cls.local_dir(REPO_ROOT, remote_path=REPO_PATH)
     mount_module = getattr(modal, "mount", None)
-    if mount_module is not None and hasattr(mount_module, "Mount"):
-        return mount_module.Mount.from_local_dir(REPO_ROOT, remote_path=REPO_PATH)
+    if mount_module is not None:
+        if hasattr(mount_module, "from_local_dir"):
+            return mount_module.from_local_dir(REPO_ROOT, remote_path=REPO_PATH)
+        if hasattr(mount_module, "Mount"):
+            mount_cls = mount_module.Mount
+            if hasattr(mount_cls, "from_local_dir"):
+                return mount_cls.from_local_dir(REPO_ROOT, remote_path=REPO_PATH)
+            if hasattr(mount_cls, "local_dir"):
+                return mount_cls.local_dir(REPO_ROOT, remote_path=REPO_PATH)
     raise RuntimeError("Modal Mount API not available; cannot mount repo source.")
 
 
