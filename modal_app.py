@@ -3,14 +3,12 @@ from __future__ import annotations
 import argparse
 import shlex
 import subprocess
-from pathlib import Path
 
 import modal
 
 
 APP_NAME = "constructive-evals"
-REPO_ROOT = Path(__file__).resolve().parent
-REPO_PATH = "/repo"
+REPO_PATH = "/root"
 
 image = (
     modal.Image.debian_slim()
@@ -24,19 +22,7 @@ image = (
     )
 )
 
-app = modal.App(APP_NAME)
-
-
-def _mount_from_local_dir(path: Path, *, remote_path: str):
-    if hasattr(modal, "Mount"):
-        return modal.Mount.from_local_dir(path, remote_path=remote_path)
-    mount_module = getattr(modal, "mount", None)
-    if mount_module is not None and hasattr(mount_module, "Mount"):
-        return mount_module.Mount.from_local_dir(path, remote_path=remote_path)
-    raise RuntimeError(
-        "Modal Mount API not found. Update the modal package or adjust modal_app.py "
-        "to the installed SDK version."
-    )
+app = modal.App(APP_NAME, include_source=True)
 
 
 def _split_command(cmd: str) -> list[str]:
@@ -54,7 +40,6 @@ def _power_persona_command(args: str) -> list[str]:
     image=image,
     gpu="A10G",
     timeout=60 * 60,
-    mounts=[_mount_from_local_dir(REPO_ROOT, remote_path=REPO_PATH)],
     secrets=[modal.Secret.from_name("huggingface")],
 )
 def run_cli(command: str, *, use_power_persona: bool = True) -> int:
