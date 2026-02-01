@@ -1,10 +1,15 @@
 from __future__ import annotations
 
 import argparse
+import sys
+from pathlib import Path
 
 from power_persona_sampling.lm.base import SamplingParams
 
-from persona_creator_lib import build_lm, generate_samples, write_samples
+SCRIPT_DIR = Path(__file__).resolve().parent
+sys.path.insert(0, str(SCRIPT_DIR))
+
+from persona_creator_lib import build_lm, generate_samples, write_samples  # noqa: E402
 
 
 def build_parser() -> argparse.ArgumentParser:
