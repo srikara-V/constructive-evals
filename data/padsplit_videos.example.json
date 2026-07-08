@@ -1,0 +1,25 @@
+{
+  "_comment": "Example manifest for experiments/creative_ranking_videos_*. Copy to data/padsplit_videos.json with real entries. Flat format shown; video_path is relative to this file's directory (absolute paths also fine). Metrics: impressions+clicks derive smoothed CTR; conversions derives conversion_rate; or provide any precomputed field and pass --metric <name>. Optional fields: campaign (pairs are built within the same campaign so audiences match), brand, platform. A {\"train\": [...], \"test\": [...]} pair format mirroring data/tweet_pairs.json is also accepted.",
+  "creatives": [
+    {
+      "id": "ps_0001",
+      "video_path": "padsplit/videos/hook_testimonial_a.mp4",
+      "impressions": 48213,
+      "clicks": 1103,
+      "conversions": 71,
+      "campaign": "padsplit_hosts_q2_2026",
+      "brand": "PadSplit",
+      "platform": "meta_reels"
+    },
+    {
+      "id": "ps_0002",
+      "video_path": "padsplit/videos/hook_ugc_walkthrough.mp4",
+      "impressions": 51877,
+      "clicks": 689,
+      "conversions": 40,
+      "campaign": "padsplit_hosts_q2_2026",
+      "brand": "PadSplit",
+      "platform": "meta_reels"
+    }
+  ]
+}

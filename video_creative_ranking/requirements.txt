@@ -1,0 +1,16 @@
+# video_creative_ranking dependencies
+# GPU box: install torch with CUDA per https://pytorch.org, then the rest.
+torch>=2.2
+transformers>=4.51        # Qwen2.5-VL + SmolVLM2 support (v5 also works)
+accelerate>=0.30
+av>=12.0                  # frame/audio decode + synthetic video encode (no system ffmpeg needed)
+imageio-ffmpeg>=0.4.9     # bundled ffmpeg binary used only by make_synthetic_data.py
+numpy
+scipy
+scikit-learn
+tqdm
+pillow
+requests                  # openai_compat VLM backend
+# num2words is needed by the SmolVLM2 processor (smoke preset only).
+# Its docopt dependency fails to build on some systems; install with:
+#   pip install --no-deps num2words
