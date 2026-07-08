@@ -37,6 +37,13 @@ python experiments/creative_ranking_videos_4/run.py \
     --manifest data/padsplit_videos.json --preset padsplit_7b --n-test 500
 ```
 
+Smoke verification (synthetic videos, real tiny models — full table in
+`../creative_ranking_videos_2/README.md`): VLM-native activations hit
+**95.2%** vs 71.4% for every caption-bottleneck method, reproducing the
+published ordering end-to-end. The pairwise judge collapsed to 28.6% at
+0.5B scale (two verbose captions overwhelm a tiny base model) — treat it
+as meaningful only with ≥7B judges.
+
 If v4A beats v2/v3 on padsplit, the caption bottleneck was the problem —
 next steps would be bigger VLM contexts (more frames), CLAP audio
 embeddings as a fusion branch, or fine-tuning the VLM head directly

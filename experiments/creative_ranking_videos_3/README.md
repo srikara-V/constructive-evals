@@ -35,3 +35,10 @@ but mean-difference is too blunt (keep probes). `everything ≈ 50%` → the
 signal didn't survive the caption bottleneck → `creative_ranking_videos_4`.
 `contrastive > probes` → you are label-starved; get more pairs before
 trusting either.
+
+Smoke verification (synthetic videos, real tiny models — see the table in
+`../creative_ranking_videos_2/README.md`): independent probe and BT probe
+71.4%, matching the contrastive vector, all well above the 50% floor.
+With only ~38 train pairs the probes can't beat diff-in-means yet — the
+in-distribution probe advantage needs a few hundred pairs, which padsplit
+should provide.

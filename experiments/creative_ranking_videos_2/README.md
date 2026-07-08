@@ -82,9 +82,37 @@ Useful flags:
 Captions, transcripts, and activations are cached under
 `cache/video_creative_ranking/` keyed by video content hash + model, so
 re-runs and the v3/v4 experiments only pay for the stages they change.
-`make_synthetic_data.py` + `--preset smoke` (tiny real models, CPU-safe) or
-`--preset mock` (no downloads) verify the pipeline anywhere; both were run
-end-to-end before commit — see `results/`.
+
+## Verification runs (synthetic videos, CPU)
+
+`make_synthetic_data.py` builds 20 short mp4s with a planted quality
+signal (bright/fast/"SALE 50% OFF"/energetic audio = high CTR) plus
+noise; 38 train / 21 test pairs, no video shared across the split. The
+whole v2→v3→v4 suite was run end-to-end twice before commit:
+
+| method | mock preset | smoke preset (real models¹) |
+|---|---|---|
+| v2 contrastive vector | 85.7% | 71.4% |
+| v3 independent probe | 85.7% | 71.4% |
+| v3 Bradley-Terry probe | 71.4% | 71.4% |
+| v3 delta probe | 81.0% | 61.9% |
+| v4 VLM-native contrastive | n/a² | **95.2%** |
+| v4 VLM-native BT probe | n/a² | **95.2%** |
+| v4 fusion (7 signals) | 81.0% | 90.5% |
+| v4 pairwise judge (debiased) | 81.0% | 28.6%³ |
+| zero-shot Yes/No judge | 52.4% | 66.7% |
+| random | 50.0% | 50.0% |
+
+¹ SmolVLM2-256M-Video watching the frames, whisper-tiny, Qwen2.5-0.5B
+base — the identical code path as `padsplit_7b`, only smaller checkpoints.
+² the mock backend fabricates pseudo hidden states; numbers meaningless.
+³ tiny base LLMs can't compare two verbose captions — expect this
+baseline to behave only at 7B scale.
+
+At real-model scale the ordering matched the literature exactly:
+VLM-native activations (v4) > caption-bottleneck methods (v2/v3) >
+zero-shot judges. On 21 pairs the CIs are wide (±~19 pts) — these runs
+verify the machinery, not padsplit performance.
 
 ## What to expect (calibration from the literature)
 

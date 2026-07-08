@@ -215,7 +215,8 @@ def main():
                                        1.0 - prob_b, prob_b, y))
         print(f"Fusion signals: {feat_names}")
         # -coef: positive number = signal pushes toward the higher-scored side
-        print(f"Fusion weights: {dict(zip(feat_names, np.round(-clf.coef_[0], 3)))}")
+        weights = {n: round(float(w), 3) for n, w in zip(feat_names, -clf.coef_[0])}
+        print(f"Fusion weights: {weights}")
         selected["fusion_signals"] = feat_names
     else:
         print("  No common scores across all creatives — skipping fusion "
